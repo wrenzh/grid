@@ -1,4 +1,6 @@
-import { useState, Suspense } from "react";
+"use client"
+
+import { useState, Suspense, useEffect } from "react";
 import { RxReset } from "react-icons/rx";
 import Separator from "./separator";
 
@@ -12,7 +14,6 @@ export default function ControlModes({
     const [modbusEnabled, setModbusEnabled] = useState(true);
     const [bacnetEnabled, setBacnetEnabled] = useState(true);
     const [debugEnabled, setDebugEnabled] = useState(true);
-    const [changed, setChanged] = useState(false);
 
     interface TransmitterControlModeInterface {
         analog: boolean;
@@ -23,48 +24,45 @@ export default function ControlModes({
     }
 
     async function fetchData() {
-        try {
-            if (!changed) {
-                const response = await fetch(
-                    "/" + transmitterUid + "/control_mode"
-                );
-                const json = await response.json();
-                const controlMode: TransmitterControlModeInterface =
-                    JSON.parse(json);
-                setAnalogEnabled(controlMode.analog);
-                setButtonEnabled(controlMode.button);
-                setModbusEnabled(controlMode.modbus);
-                setBacnetEnabled(controlMode.bacnet);
-                setDebugEnabled(controlMode.debug);
-            } else {
-                const data = {
-                    analog: analogEnabled,
-                    button: buttonEnabled,
-                    modbus: modbusEnabled,
-                    bacnet: bacnetEnabled,
-                    debug: debugEnabled,
-                };
-                const response = await fetch(
-                        "/" +
-                        transmitterUid +
-                        "/control_mode",
-                    {
-                        method: "PUT",
-                        body: JSON.stringify(data),
-                    }
-                );
-                if (!response.ok) {
-                } else {
-                    setChanged(false);
-                }
+        const response = await fetch(
+            "/api/lighting/" + transmitterUid + "/control_mode"
+        );
+        const json: TransmitterControlModeInterface = await response.json();
+        setAnalogEnabled(json.analog);
+        setButtonEnabled(json.button);
+        setModbusEnabled(json.modbus);
+        setBacnetEnabled(json.bacnet);
+        setDebugEnabled(json.debug);
+    } 
+
+
+    useEffect(() => {
+        async function updateData() {
+            if (transmitterUid != "ERROR" && transmitterUid != "") {
+                return;
             }
-        } catch (e) {
-            console.error(e);
+            const data = {
+                analog: analogEnabled,
+                button: buttonEnabled,
+                modbus: modbusEnabled,
+                bacnet: bacnetEnabled,
+                debug: debugEnabled,
+            };
+            const _ = await fetch(
+                "/api/lighting/" + transmitterUid + "/control_mode",
+                {
+                    method: "PUT",
+                    body: JSON.stringify(data),
+                }
+            );
         }
-    }
+        updateData()
+    }, [analogEnabled, buttonEnabled, modbusEnabled, bacnetEnabled, debugEnabled, transmitterUid]);
 
     async function TransmitterControlMode() {
-        // await fetchData();
+        if (transmitterUid != "ERROR" && transmitterUid != "") {
+            await fetchData();
+        }
         return (
             <>
                 <div className="flex justify-center">
@@ -75,7 +73,6 @@ export default function ControlModes({
                                 checked={analogEnabled}
                                 onChange={() => {
                                     setAnalogEnabled(!analogEnabled);
-                                    setChanged(true);
                                 }}
                             ></input>
                             <label className="p-2">Analog 0-10V</label>
@@ -94,7 +91,6 @@ export default function ControlModes({
                                 checked={modbusEnabled}
                                 onChange={() => {
                                     setModbusEnabled(!modbusEnabled);
-                                    setChanged(true);
                                 }}
                             ></input>
                             <label className="p-2">Modbus RTU</label>
@@ -105,7 +101,6 @@ export default function ControlModes({
                                 checked={bacnetEnabled}
                                 onChange={() => {
                                     setBacnetEnabled(!bacnetEnabled);
-                                    setChanged(true);
                                 }}
                             ></input>
                             <label className="p-2">BacNet/IP</label>
@@ -116,7 +111,6 @@ export default function ControlModes({
                                 checked={debugEnabled}
                                 onChange={() => {
                                     setDebugEnabled(!debugEnabled);
-                                    setChanged(true);
                                 }}
                             ></input>
                             <label className="p-2">RS232 Debug</label>
@@ -128,12 +122,7 @@ export default function ControlModes({
     }
 
     async function reset() {
-        const request = await fetch(
-            "/" + transmitterUid + "/control_mode",
-            {
-                method: "DELETE",
-            }
-        );
+        const _ = await fetch("/api/lighting/" + transmitterUid + "/reset_control_mode", { method: "POST"});
     }
 
     return (

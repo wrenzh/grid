@@ -1,29 +1,26 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { IoRefreshSharp } from "react-icons/io5";
 import Separator from "./separator";
 
 export default function ListTransmitter({
-    transmitterUid,
     updateTransmitterUid,
-    serverUrl,
 }: {
-    transmitterUid: string;
     updateTransmitterUid: Function;
-    serverUrl: string;
 }) {
     interface TransmitterAddress {
         address: string;
     }
 
+    const [transmitterUidItem, setTransmitterUidItem] = useState("")
+
     async function fetchData() {
         try {
             const response = await fetch("/api/lighting/list_cco");
             if (response.ok) {
-                const json = await response.json();
-                const address: TransmitterAddress = JSON.parse(json);
-                updateTransmitterUid(address.address);
+                const json: TransmitterAddress = await response.json();
+                setTransmitterUidItem(json.address);
             } else {
-              updateTransmitterUid("ERROR");
+              setTransmitterUidItem("ERROR");
             }
         } catch (e) {
             console.error(e);
@@ -38,8 +35,13 @@ export default function ListTransmitter({
                     <select
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-80 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         size={1}
+                        onChange={(e) =>
+                            updateTransmitterUid(e.target.value)
+                        }
                     >
-                        <option value={transmitterUid}>{transmitterUid}</option>
+                        <option value={transmitterUidItem} key={transmitterUidItem}>
+                            {transmitterUidItem}
+                        </option>
                     </select>
                     <IoRefreshSharp
                         size={40}
