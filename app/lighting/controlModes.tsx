@@ -3,11 +3,9 @@ import { RxReset } from "react-icons/rx";
 import Separator from "./separator";
 
 export default function ControlModes({
-    transmitterUid,
-    serverUrl,
+    transmitterUid
 }: {
-    transmitterUid: string;
-    serverUrl: string;
+    transmitterUid: string
 }) {
     const [analogEnabled, setAnalogEnabled] = useState(true);
     const [buttonEnabled, setButtonEnabled] = useState(true);
@@ -28,7 +26,7 @@ export default function ControlModes({
         try {
             if (!changed) {
                 const response = await fetch(
-                    serverUrl + "/" + transmitterUid + "/control_mode"
+                    "/" + transmitterUid + "/control_mode"
                 );
                 const json = await response.json();
                 const controlMode: TransmitterControlModeInterface =
@@ -47,8 +45,6 @@ export default function ControlModes({
                     debug: debugEnabled,
                 };
                 const response = await fetch(
-                    "http://" +
-                        serverUrl +
                         "/" +
                         transmitterUid +
                         "/control_mode",
@@ -133,7 +129,7 @@ export default function ControlModes({
 
     async function reset() {
         const request = await fetch(
-            serverUrl + "/" + transmitterUid + "/control_mode",
+            "/" + transmitterUid + "/control_mode",
             {
                 method: "DELETE",
             }

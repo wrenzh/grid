@@ -17,7 +17,7 @@ export default function ListTransmitter({
 
     async function fetchData() {
         try {
-            const response = await fetch(serverUrl + "/list_cco");
+            const response = await fetch("/api/lighting/list_cco");
             if (response.ok) {
                 const json = await response.json();
                 const address: TransmitterAddress = JSON.parse(json);
