@@ -4,17 +4,20 @@ import { useState } from "react";
 import Navbar from "@/components/navbar";
 import ListTransmitter from "@/app/lighting/listTransmitter";
 import ControlModes from "@/app/lighting/controlModes";
+import BroadcastDimming from "./broadcastDimming";
 
 export function Lighting() {
   const [transmitterUid, setTransmitterUid] = useState("");
   return (
-    <>
-      <Navbar selectedTab={"Lighting"} />
-      <ListTransmitter
-        updateTransmitterUid={(a: string) => setTransmitterUid(a)}
-      />
-      <ControlModes transmitterUid={transmitterUid}/>
-    </>
+      <>
+          <Navbar selectedTab={"Lighting"} />
+          <ListTransmitter
+              transmitterUid={transmitterUid}
+              setTransmitterUid={setTransmitterUid}
+          />
+          <ControlModes transmitterUid={transmitterUid} />
+          <BroadcastDimming transmitterUid={transmitterUid} />
+      </>
   );
 }
 

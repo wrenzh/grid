@@ -1,67 +1,92 @@
-import { Suspense, useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { IoRefreshSharp } from "react-icons/io5";
 import Separator from "./separator";
 
-export default function ListTransmitter({
-    updateTransmitterUid,
+function TransmitterUid({
+    transmitterUid,
+    setTransmitterUid,
 }: {
-    updateTransmitterUid: Function;
+    transmitterUid: string;
+    setTransmitterUid: Function;
 }) {
-    interface TransmitterAddress {
-        address: string;
-    }
+    const [loading, setLoading] = useState(true);
 
-    const [transmitterUidItem, setTransmitterUidItem] = useState("")
-
-    async function fetchData() {
+    async function updateTransmitterUid() {
         try {
             const response = await fetch("/api/lighting/list_cco");
-            if (response.ok) {
-                const json: TransmitterAddress = await response.json();
-                setTransmitterUidItem(json.address);
-            } else {
-              setTransmitterUidItem("ERROR");
-            }
+            const json = await response.json();
+            setTransmitterUid(json.address);
         } catch (e) {
-            console.error(e);
+            setTransmitterUid("ERROR");
         }
+        setLoading(false);
     }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch("/api/lighting/list_cco");
+                const json = await response.json();
+                setTransmitterUid(json.address);
+            } catch (e) {
+                setTransmitterUid("ERROR");
+            }
+            setLoading(false);
+        };
 
-    async function TransmitterUid() {
-        await fetchData();
-        return (
-            <>
-                <div className="flex flex-row justify-center">
-                    <select
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-80 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        size={1}
-                        onChange={(e) =>
-                            updateTransmitterUid(e.target.value)
-                        }
-                    >
-                        <option value={transmitterUidItem} key={transmitterUidItem}>
-                            {transmitterUidItem}
-                        </option>
-                    </select>
+        fetchData();
+    }, [setTransmitterUid]);
+
+    return (
+        <div className="flex flex-row justify-center">
+            {loading ? (
+                <>
+                    <button className="w-40 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">
+                        Loading...
+                    </button>
                     <IoRefreshSharp
                         size={40}
                         title={"Force rescan the transmitter ID"}
-                        onClick={() => fetchData()}
                         className="p-2"
                     />
-                </div>
-            </>
-        );
-    }
+                </>
+            ) : (
+                <>
+                    <button className="w-40 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">
+                        {transmitterUid}
+                    </button>
+                    <IoRefreshSharp
+                        size={40}
+                        title={"Force rescan the transmitter ID"}
+                        onClick={() => {
+                            setLoading(true);
+                            updateTransmitterUid();
+                        }}
+                        className="p-2"
+                    />
+                </>
+            )}
+        </div>
+    );
+}
 
+export default function ListTransmitter({
+    transmitterUid,
+    setTransmitterUid,
+}: {
+    transmitterUid: string;
+    setTransmitterUid: Function;
+}) {
     return (
         <>
             <label className="flex justify-center mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                Select a transmitter ID to start
+                Select transmitter UID to start
             </label>
-            <Suspense fallback={<option value="">Loading...</option>}>
-                <TransmitterUid />
-            </Suspense>
+            <TransmitterUid
+                transmitterUid={transmitterUid}
+                setTransmitterUid={setTransmitterUid}
+            />
             <Separator />
         </>
     );
