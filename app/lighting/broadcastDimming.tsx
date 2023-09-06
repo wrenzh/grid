@@ -8,15 +8,13 @@ export default function BroadcastDimming({
 }) {
     const [dimming, setDimming] = useState([0, 0, 0]);
     const [loading, setLoading] = useState(true);
+    const [tempDimming, setTempDimming] = useState([0, 0, 0])
 
     interface Dimming {
         dimming_levels: Array<number>;
     }
 
     useEffect(() => {
-        if (loading) {
-            return;
-        }
         const setData = async (dimming: Array<number>) => {
             if (transmitterUid == "ERROR" || transmitterUid == "") {
                 return;
@@ -41,7 +39,7 @@ export default function BroadcastDimming({
         };
 
         setData(dimming);
-    });
+    }, [dimming, transmitterUid]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -54,6 +52,7 @@ export default function BroadcastDimming({
                 );
                 const json: Dimming = await response.json();
                 setDimming(json.dimming_levels);
+                setTempDimming(json.dimming_levels)
                 setLoading(false);
             } catch (e) {
                 console.log(e);
@@ -75,16 +74,18 @@ export default function BroadcastDimming({
                         min="0"
                         max="100"
                         step="0.1"
-                        value={dimming[0] / 10}
+                        value={tempDimming[0] / 10}
                         disabled={loading}
                         onChange={(e) => {
-                            e.preventDefault();
                             const temp = [
                                 Number(e.target.value) * 10,
-                                dimming[1],
-                                dimming[2],
+                                tempDimming[1],
+                                tempDimming[2],
                             ];
-                            setDimming(temp);
+                            setTempDimming(temp);
+                        }}
+                        onMouseUp={(e) => {
+                            setDimming(tempDimming);
                         }}
                         className="w-60 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                     />
@@ -99,16 +100,18 @@ export default function BroadcastDimming({
                         min="0"
                         max="100"
                         step="0.1"
-                        value={dimming[1] / 10}
+                        value={tempDimming[1] / 10}
                         disabled={loading}
                         onChange={(e) => {
-                            e.preventDefault();
                             const temp = [
-                                dimming[0],
+                                tempDimming[0],
                                 Number(e.target.value) * 10,
-                                dimming[2],
+                                tempDimming[2],
                             ];
-                            setDimming(temp);
+                            setTempDimming(temp);
+                        }}
+                        onMouseUp={(e) => {
+                            setDimming(tempDimming);
                         }}
                         className="w-60 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                     />
@@ -123,16 +126,18 @@ export default function BroadcastDimming({
                         min="0"
                         max="100"
                         step="0.1"
-                        value={dimming[2] / 10}
+                        value={tempDimming[2] / 10}
                         disabled={loading}
                         onChange={(e) => {
-                            e.preventDefault();
                             const temp = [
-                                dimming[0],
-                                dimming[1],
+                                tempDimming[0],
                                 Number(e.target.value) * 10,
+                                tempDimming[2],
                             ];
-                            setDimming(temp);
+                            setTempDimming(temp);
+                        }}
+                        onMouseUp={(e) => {
+                            setDimming(tempDimming);
                         }}
                         className="w-60 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                     />
