@@ -1,14 +1,13 @@
+"use client"
+
+import Sensor from "./sensor"
 import Navbar from "@/components/navbar";
 
-function Sensor() {
+export default function Page() {
     return (
         <>
             <Navbar selectedTab={"Sensor"} />
-            <p>Hold your breath... It is coming!</p>
+            <Sensor />
         </>
     );
-}
-
-export default function Page() {
-    return <Sensor />;
 }
